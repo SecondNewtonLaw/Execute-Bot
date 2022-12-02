@@ -115,10 +115,10 @@ public static partial class Commands
             Name = "exec",
             Description = "Executes a command remotely on the discord bot server.",
         };
-        cmdBuild.AddOption("useBash", ApplicationCommandOptionType.Boolean, "States wether or not the bot should run this command using the Bash script interpreter", true, false);
+        cmdBuild.AddOption("usebash", ApplicationCommandOptionType.Boolean, "States wether or not the bot should run this command using the Bash script interpreter", true, false);
         cmdBuild.AddOption("executable", ApplicationCommandOptionType.String, "The path to the executable used to perform the operation", true, false);
         cmdBuild.AddOption("arguments", ApplicationCommandOptionType.String, "The arguments given to the executable to do it's job");
-        cmdBuild.AddOption("sudoRequired", ApplicationCommandOptionType.Boolean, "Does the command require sudo?");
+        cmdBuild.AddOption("sudorequired", ApplicationCommandOptionType.Boolean, "Does the command require sudo?");
 
         return cmdBuild.Build();
     }
