@@ -117,8 +117,8 @@ public static partial class Commands
         };
         cmdBuild.AddOption("usebash", ApplicationCommandOptionType.Boolean, "States wether or not the bot should run this command using the Bash script interpreter", true, false);
         cmdBuild.AddOption("executable", ApplicationCommandOptionType.String, "The path to the executable used to perform the operation", true, false);
-        cmdBuild.AddOption("arguments", ApplicationCommandOptionType.String, "The arguments given to the executable to do it's job");
-        cmdBuild.AddOption("sudorequired", ApplicationCommandOptionType.Boolean, "Does the command require sudo?");
+        cmdBuild.AddOption("arguments", ApplicationCommandOptionType.String, "The arguments given to the executable to do it's job", true, false);
+        cmdBuild.AddOption("sudorequired", ApplicationCommandOptionType.Boolean, "Does the command require sudo?", true, false);
 
         return cmdBuild.Build();
     }
