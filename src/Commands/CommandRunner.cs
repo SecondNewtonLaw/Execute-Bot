@@ -88,6 +88,7 @@ public static partial class Commands
                         catch (Exception ex)
                         {
                             await botResponse.ModifyAsync(x => x.Content += $"\nThe communication between the Bots' Process and the Child Process was killed unexpectedly, aborting. Finished with Exception: {ex}");
+                            return;
                         }
                         await Task.Delay(500);
                     }
