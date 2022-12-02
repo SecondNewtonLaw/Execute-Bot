@@ -47,6 +47,9 @@ public static partial class Commands
         else
             processName = executableName;
 
+        if (arguments.ToLower() == "null")
+            arguments = "";
+        
         ProcessStartInfo processInformation = new()
         {
             FileName = processName,
