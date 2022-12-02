@@ -73,13 +73,13 @@ public static partial class Commands
                         await Task.Delay(500);
                     }
                     await processInstance?.WaitForExitAsync()!;
-                    await botResponse.ModifyAsync(x => x.Content = "Process Exited. Attaching Complete Output.");
+                    await botResponse.ModifyAsync(x => x.Content += "\nProcess Exited. Attaching Complete Output.");
 
                     Stream stdOut = processInstance.StandardOutput.BaseStream;
 
                     await botResponse.ModifyAsync(x =>
                     {
-                        x.Content = "Process Exited. Output Attached";
+                        x.Content += "\nProcess Exited. Output Attached";
                         List<FileAttachment> attachments = (List<FileAttachment>)Enumerable.Empty<FileAttachment>();
                         attachments.Add(new FileAttachment(stdOut, "stdout.txt", "The standard output stream of the Executable.", true));
                         x.Attachments = attachments;
