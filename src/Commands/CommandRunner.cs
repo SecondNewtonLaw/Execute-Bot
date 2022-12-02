@@ -58,7 +58,7 @@ public static partial class Commands
                 
         ProcessStartInfo processInformation = new()
         {
-            FileName = sudoRequired ? "sudo " + processName : processName,
+            FileName = processName,
             Arguments = arguments,
             RedirectStandardInput = true,
         };
