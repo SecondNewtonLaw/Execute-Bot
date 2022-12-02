@@ -33,13 +33,15 @@ public static partial class Commands
 
         if (semaphoreAccessTimedOut)
         {
-            await botResponse.ModifyAsync(x => x.Content += "\nRequest Failure: Semaphore Lock Timed Out: Another Thread has the Semaphore Lock. Could not execute the process.");
+            await botResponse.ModifyAsync(x => x.Content = x.Content.Value + "\nRequest Failure: Semaphore Lock Timed Out: Another Thread has the Semaphore Lock. Could not execute the process.");
         }
         executableName ??= "exit";
 
         if (sudoRequired && !sockCommand.User.GetGuildUser().GuildPermissions.Administrator)
-            await botResponse.ModifyAsync(x => x.Content += "\nRequest Failure: Attempted to invoke a command which requires the usage of `sudo`, yet the user lacks permissions to do so.");
-
+        {
+            await botResponse.ModifyAsync(x => x.Content = x.Content.Value + "\nRequest Failure: Attempted to invoke a command which requires the usage of `sudo`, yet the user lacks permissions to do so.");
+            return;
+        }
         string? processName;
 
         if (execOnBash)
@@ -47,15 +49,17 @@ public static partial class Commands
         else
             processName = executableName;
 
-        if (arguments.ToLower() == "null")
+        if (string.Equals(arguments, "null", StringComparison.OrdinalIgnoreCase))
             arguments = "";
-        
+
         if (execOnBash)
+        {
             if (sudoRequired)
                 arguments = $"-c sudo {executableName}";
-            else 
+            else
                 arguments = $"-c {executableName}";
-                
+        }
+
         ProcessStartInfo processInformation = new()
         {
             FileName = processName,
@@ -63,11 +67,11 @@ public static partial class Commands
             RedirectStandardInput = true,
         };
         Process? processInstance = null;
-        await botResponse.ModifyAsync(x => x.Content += "\nAttempting to Start the Requested Process.");
+        await botResponse.ModifyAsync(x => x.Content = x.Content.Value + "\nAttempting to Start the Requested Process.");
         try
         {
             processInstance = Process.Start(processInformation);
-            await botResponse.ModifyAsync(x => x.Content += "\nProcess Started. Using password if `sudo` was required... | Process Watcher moved to a Separate Thread.");
+            await botResponse.ModifyAsync(x => x.Content = x.Content.Value + "\nProcess Started. Using password if `sudo` was required... | Process Watcher moved to a Separate Thread.");
 
             Thread watcher = new(async () =>
             {
@@ -77,17 +81,24 @@ public static partial class Commands
                     {
                         // Wait a Delay before attempting to write the `sudo` password.
                         await Task.Delay(500);
-                        await processInstance?.StandardInput.WriteLineAsync(await File.ReadAllTextAsync("PASSWORD", Encoding.UTF8))!;
+                        try
+                        {
+                            processInstance?.StandardInput.WriteLine(await File.ReadAllTextAsync("PASSWORD", Encoding.UTF8));
+                        }
+                        catch (Exception ex)
+                        {
+                            await botResponse.ModifyAsync(x => x.Content = x.Content.Value + $"\nThe communication between the Bots' Process and the Child Process was killed unexpectedly, aborting. Finished with Exception: {ex}");
+                        }
                         await Task.Delay(500);
                     }
                     await processInstance?.WaitForExitAsync()!;
-                    await botResponse.ModifyAsync(x => x.Content += "\nProcess Exited. Attaching Complete Output.");
+                    await botResponse.ModifyAsync(x => x.Content = x.Content.Value + "\nProcess Exited. Attaching Complete Output.");
 
                     Stream stdOut = processInstance.StandardOutput.BaseStream;
 
                     await botResponse.ModifyAsync(x =>
                     {
-                        x.Content += "\nProcess Exited. Output Attached";
+                        x.Content = x.Content.Value + "\nProcess Exited. Output Attached";
                         List<FileAttachment> attachments = (List<FileAttachment>)Enumerable.Empty<FileAttachment>();
                         attachments.Add(new FileAttachment(stdOut, "stdout.txt", "The standard output stream of the Executable.", true));
                         x.Attachments = attachments;
@@ -106,7 +117,7 @@ public static partial class Commands
         }
         catch (Exception ex)
         {
-            await botResponse.ModifyAsync(x => x.Content = $"Process Initialization failure: Failed at {DateTime.UtcNow} with error `{ex}`");
+            await botResponse.ModifyAsync(x => x.Content = x.Content.Value + $"\nProcess Initialization failure: Failed at {DateTime.UtcNow} with error `{ex}`");
             processInstance?.Dispose();
             semaphoreSlim.Release();                    // Avoid a DeadLock by releasing the Semaphore.
             return;
