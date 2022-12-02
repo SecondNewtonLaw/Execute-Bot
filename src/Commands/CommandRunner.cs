@@ -50,6 +50,12 @@ public static partial class Commands
         if (arguments.ToLower() == "null")
             arguments = "";
         
+        if (execOnBash)
+            if (sudoRequired)
+                arguments = $"-c sudo {executableName}",
+            else 
+                arguments = $"-c {executableName}",
+                
         ProcessStartInfo processInformation = new()
         {
             FileName = sudoRequired ? "sudo " + processName : processName,
