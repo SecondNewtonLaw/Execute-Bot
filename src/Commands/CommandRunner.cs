@@ -52,9 +52,9 @@ public static partial class Commands
         
         if (execOnBash)
             if (sudoRequired)
-                arguments = $"-c sudo {executableName}",
+                arguments = $"-c sudo {executableName}";
             else 
-                arguments = $"-c {executableName}",
+                arguments = $"-c {executableName}";
                 
         ProcessStartInfo processInformation = new()
         {
